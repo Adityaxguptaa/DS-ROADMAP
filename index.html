@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Data Science Roadmap</title>
+    <!-- Font Awesome for icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <!-- Tailwind CSS CDN for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Import Inter font for a clean, modern look */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5; /* Light gray background */
+            line-height: 1.6;
+        }
+
+        /* Base styles for phase containers for scroll animation */
+        .phase-container {
+            transition: all 0.7s ease-out; /* Smooth transition for animation */
+            opacity: 0; /* Initially hidden */
+            transform: translateY(30px); /* Slightly moved down */
+        }
+        /* Class added by JavaScript when element is visible */
+        .phase-container.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Custom color classes matching the XML diagram's visual theme */
+        .phase-1-bg { background-image: linear-gradient(to bottom right, #f7e1e1, #f5c6cb); border-color: #e1848b; }
+        .phase-2-bg { background-image: linear-gradient(to bottom right, #e1f1f7, #c7e2ed); border-color: #85bcdb; }
+        .phase-3-bg { background-image: linear-gradient(to bottom right, #f7e7d9, #edcfb0); border-color: #d99763; }
+        .phase-4-bg { background-image: linear-gradient(to bottom right, #d4ebf7, #c0d9ec); border-color: #9bc1d6; }
+        .phase-5-bg { background-image: linear-gradient(to bottom right, #e1f7e3, #c7edd0); border-color: #85d691; }
+
+        /* Styles for headers within each phase */
+        .header-prog { background-color: #a6d8c0; border-color: #6bb198; }
+        .header-math { background-color: #fcd9b0; border-color: #d9ab75; }
+        .header-data-ml { background-color: #c0e0b0; border-color: #86c67c; }
+        .header-ml-fund { background-color: #fce8d7; border-color: #e6b98e; }
+        .header-dl { background-color: #e0ccf1; border-color: #b184d0; }
+        .header-nlp { background-color: #d7eafc; border-color: #9ec8f2; }
+        .header-cv { background-color: #d4f7db; border-color: #96e3a5; }
+
+        /* Styles for individual learning topic items */
+        .item-prog { background-color: #d9edf7; border-color: #8bb8dc; }
+        .item-math { background-color: #fcf8e3; border-color: #ddb56c; }
+        .item-data-ml { background-color: #e6f4e1; border-color: #a7d996; }
+        .item-ml-fund { background-color: #fcf0e4; border-color: #d4b79b; }
+        .item-dl { background-color: #f1e7f9; border-color: #cebbdd; }
+        .item-nlp { background-color: #eaf6ff; border-color: #b3d8f7; }
+        .item-cloud { background-color: #fcf8e3; border-color: #ddb56c; } /* Reusing math background as cloud is a tool */
+        .item-mlops { background-color: #e3f2f8; border-color: #a9d7eb; }
+        .item-optional { background-color: #f7e1ed; border-color: #d294bc; }
+        .item-cv { background-color: #e6f9ed; border-color: #a8e8b8; }
+        .item-project { background-color: #d6f5d8; border-color: #98d69f; }
+
+        /* Specific style for the "JOB SUCCESS!" node */
+        .item-success {
+            background-color: #ffd700; /* Gold color */
+            border-color: #ccac00; /* Darker gold border */
+            background-image: linear-gradient(to top, #ffd700, #ffe033); /* Gradient for depth */
+            font-size: 1.5rem; /* Larger font size */
+            font-weight: 700; /* Bold font */
+            box-shadow: 0 10px 20px rgba(255, 215, 0, 0.4); /* Stronger shadow */
+            transition: transform 0.3s ease;
+        }
+        .item-success:hover {
+            transform: scale(1.05); /* Slight scale on hover */
+        }
+
+        /* Pulse animation for the Job Success node */
+        @keyframes pulse-success {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(255, 215, 0, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); }
+        }
+        .animate-pulse-success {
+            animation: pulse-success 2s infinite; /* Apply the pulse animation */
+        }
+
+        /* Spinner for loading indicator */
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #4f46e5; /* Blue for the spinner */
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Hover effect for all interactive items */
+        .item-prog:hover, .item-math:hover, .item-data-ml:hover, .item-ml-fund:hover,
+        .item-dl:hover, .item-nlp:hover, .item-cloud:hover, .item-mlops:hover,
+        .item-optional:hover, .item-cv:hover, .item-project:hover, .header-prog:hover,
+        .header-math:hover, .header-data-ml:hover, .header-ml-fund:hover,
+        .header-dl:hover, .header-nlp:hover, .header-cv:hover {
+            transform: translateY(-3px); /* Lift effect */
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2); /* Enhanced shadow */
+            cursor: pointer; /* Indicate interactivity */
+        }
+        .item-prog, .item-math, .item-data-ml, .item-ml-fund,
+        .item-dl, .item-nlp, .item-cloud, .item-mlops,
+        .item-optional, .item-cv, .item-project, .header-prog,
+        .header-math, .header-data-ml, .header-ml-fund,
+        .header-dl, .header-nlp, .header-cv {
+            transition: all 0.2s ease-in-out; /* Smooth transition for hover effects */
+            border-width: 2px; /* Consistent border for all items */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <!-- Main Title -->
+        <h1 class="text-4xl font-bold text-center mb-12 text-purple-800 shadow-md p-4 rounded-xl bg-white">
+            🚀 Your Data Science Roadmap 📈
+        </h1>
+
+        <!-- Phase 1: Foundational Skills (Base Camp) -->
+        <div class="phase-container phase-1-bg p-6 rounded-xl shadow-lg border-2 mb-8">
+            <h2 class="text-2xl font-bold text-center mb-6 text-gray-700">PHASE 1: FOUNDATIONAL SKILLS (BASE CAMP)</h2>
+            <div class="flex flex-col md:flex-row justify-around gap-6">
+                <!-- Programming Essentials Column -->
+                <div class="w-full md:w-1/2 flex flex-col">
+                    <div class="header-prog p-3 rounded-lg shadow-md mb-3 text-center font-semibold text-lg border">👨‍💻 PROGRAMMING ESSENTIALS</div>
+                    <div class="item-prog p-3 rounded-lg shadow-sm mb-2 text-sm border">Python (Syntax, Data Structures, OOP)</div>
+                    <div class="item-prog p-3 rounded-lg shadow-sm mb-2 text-sm border">Version Control (Git &amp; GitHub)</div>
+                    <div class="item-prog p-3 rounded-lg shadow-sm text-sm border">SQL (Database Fundamentals)</div>
+                </div>
+                <!-- Math & Stats Column -->
+                <div class="w-full md:w-1/2 flex flex-col">
+                    <div class="header-math p-3 rounded-lg shadow-md mb-3 text-center font-semibold text-lg border">📊 MATH &amp; STATS FOR DS</div>
+                    <div class="item-math p-3 rounded-lg shadow-sm mb-2 text-sm border">Linear Algebra (Matrices, Vectors)</div>
+                    <div class="item-math p-3 rounded-lg shadow-sm mb-2 text-sm border">Calculus (Derivatives, Gradients)</div>
+                    <div class="item-math p-3 rounded-lg shadow-sm text-sm border">Probability &amp; Statistics (Distributions, Hypothesis Testing)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phase 2: Core Data Science (Ascent to Knowledge) -->
+        <div class="phase-container phase-2-bg p-6 rounded-xl shadow-lg border-2 mb-8">
+            <h2 class="text-2xl font-bold text-center mb-6 text-gray-700">PHASE 2: CORE DATA SCIENCE (ASCENT TO KNOWLEDGE)</h2>
+            <div class="flex flex-col md:flex-row justify-around gap-6">
+                <!-- Data Manipulation & ML Fundamentals Column -->
+                <div class="w-full md:w-1/2 flex flex-col">
+                    <div class="header-data-ml p-3 rounded-lg shadow-md mb-3 text-center font-semibold text-lg border">🧮 DATA MANIPULATION &amp; VIZ</div>
+                    <div class="item-data-ml p-3 rounded-lg shadow-sm mb-2 text-sm border">Pandas &amp; NumPy</div>
+                    <div class="item-data-ml p-3 rounded-lg shadow-sm mb-2 text-sm border">Data Visualization (Matplotlib, Seaborn, Plotly)</div>
+
+                    <div class="header-ml-fund p-3 rounded-lg shadow-md mt-4 mb-3 text-center font-semibold text-lg border">🧠 MACHINE LEARNING FUNDAMENTALS</div>
+                    <div class="item-ml-fund p-3 rounded-lg shadow-sm mb-2 text-sm border">Supervised &amp; Unsupervised Learning</div>
+                    <div class="item-ml-fund p-3 rounded-lg shadow-sm mb-2 text-sm border">Model Evaluation &amp; Feature Engineering</div>
+                    <div class="item-ml-fund p-3 rounded-lg shadow-sm text-sm border">Scikit-learn</div>
+                </div>
+                <!-- Deep Learning & NLP Column -->
+                <div class="w-full md:w-1/2 flex flex-col">
+                    <div class="header-dl p-3 rounded-lg shadow-md mb-3 text-center font-semibold text-lg border">✨ DEEP LEARNING (SUMMITING THE PEAKS)</div>
+                    <div class="item-dl p-3 rounded-lg shadow-sm mb-2 text-sm border">Neural Network Basics</div>
+                    <div class="item-dl p-3 rounded-lg shadow-sm text-sm border">TensorFlow/Keras &amp; PyTorch</div>
+
+                    <div class="header-nlp p-3 rounded-lg shadow-md mt-4 mb-3 text-center font-semibold text-lg border">💬 NATURAL LANGUAGE PROCESSING (NLP TRAIL)</div>
+                    <div class="item-nlp p-3 rounded-lg shadow-sm mb-2 text-sm border">Text Preprocessing</div>
+                    <div class="item-nlp p-3 rounded-lg shadow-sm mb-2 text-sm border">Word Embeddings (Word2Vec, GloVe)</div>
+                    <div class="item-nlp p-3 rounded-lg shadow-sm text-sm border">Transformers (BERT, GPT Concepts)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phase 3: Tools & Ecosystem (Gear Up) -->
+        <div class="phase-container phase-3-bg p-6 rounded-xl shadow-lg border-2 mb-8">
+            <h2 class="text-2xl font-bold text-center mb-6 text-gray-700">PHASE 3: TOOLS &amp; ECOSYSTEM (GEAR UP)</h2>
+            <div class="flex flex-col md:flex-row justify-around gap-6">
+                <!-- Cloud & Containerization Column -->
+                <div class="w-full md:w-1/2 flex flex-col">
+                    <div class="item-cloud p-3 rounded-lg shadow-sm mb-3 text-center font-semibold text-lg border">☁️ Cloud Platforms (AWS, GCP, Azure Basics)</div>
+                    <div class="item-cloud p-3 rounded-lg shadow-sm text-center font-semibold text-lg border">🐳 Containerization (Docker Basics)</div>
+                </div>
+                <!-- Big Data & Deployment Column -->
+                <div class="w-full md:w-1/2 flex flex-col">
+                    <div class="item-cloud p-3 rounded-lg shadow-sm mb-3 text-center font-semibold text-lg border">🐘 Big Data Tools (Spark, Hadoop Concepts)</div>
+                    <div class="item-cloud p-3 rounded-lg shadow-sm text-center font-semibold text-lg border">🌐 Basic Deployment (Flask/Streamlit)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phase 4: MLOps & Advanced Topics (Beyond the Horizon) -->
+        <div class="phase-container phase-4-bg p-6 rounded-xl shadow-lg border-2 mb-8">
+            <h2 class="text-2xl font-bold text-center mb-6 text-gray-700">PHASE 4: MLOPS &amp; ADVANCED TOPICS (BEYOND THE HORIZON)</h2>
+            <div class="flex flex-col md:flex-row justify-around gap-6">
+                <!-- MLOps Core Column -->
+                <div class="w-full md:w-1/2 flex flex-col">
+                    <div class="item-mlops p-3 rounded-lg shadow-sm mb-3 text-center font-semibold text-lg border">⚙️ MLOps Concepts (Versioning, Monitoring, CI/CD)</div>
+                    <div class="item-mlops p-3 rounded-lg shadow-sm mb-3 text-center font-semibold text-lg border">🧪 Experiment Tracking (MLflow)</div>
+                    <div class="item-mlops p-3 rounded-lg shadow-sm text-center font-semibold text-lg border">🚀 Model Deployment (FastAPI, Kubernetes Concepts)</div>
+                </div>
+                <!-- Optional & CV Column -->
+                <div class="w-full md:w-1/2 flex flex-col">
+                    <div class="item-optional p-3 rounded-lg shadow-sm mb-2 text-sm text-center font-semibold border">🎮 Reinforcement Learning (Optional)</div>
+                    <div class="item-optional p-3 rounded-lg shadow-sm mb-2 text-sm text-center font-semibold border">🕰️ Time Series Analysis (Optional)</div>
+                    <div class="item-optional p-3 rounded-lg shadow-sm mb-2 text-sm text-center font-semibold border">🎨 Generative AI (Optional)</div>
+                    <div class="header-cv p-3 rounded-lg shadow-md mt-4 mb-3 text-center font-semibold text-lg border">👁️ COMPUTER VISION (VISUAL PATH)</div>
+                    <div class="item-cv p-3 rounded-lg shadow-sm mb-2 text-sm border">Image Preprocessing</div>
+                    <div class="item-cv p-3 rounded-lg shadow-sm text-sm border">Object Detection &amp; Segmentation</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phase 5: Real-World Application (Showcasing Prowess) -->
+        <div class="phase-container phase-5-bg p-6 rounded-xl shadow-lg border-2 mb-8">
+            <h2 class="text-2xl font-bold text-center mb-6 text-gray-700">PHASE 5: REAL-WORLD APPLICATION (SHOWCASING PROWESS)</h2>
+            <div class="flex flex-col md:flex-row justify-around gap-6">
+                <!-- Projects Column -->
+                <div class="w-full md:w-1/2 flex flex-col">
+                    <div class="item-project p-3 rounded-lg shadow-sm mb-3 text-center font-semibold text-lg border">🏗️ Build End-to-End Projects</div>
+                    <div class="item-project p-3 rounded-lg shadow-sm text-center font-semibold text-lg border">🏆 Kaggle Competitions</div>
+                </div>
+                <!-- Portfolio & Interview Prep Column -->
+                <div class="w-full md:w-1/2 flex flex-col">
+                    <div class="item-project p-3 rounded-lg shadow-sm mb-3 text-center font-semibold text-lg border">🌟 Create a Strong Online Portfolio</div>
+                    <div class="item-project p-3 rounded-lg shadow-sm text-center font-semibold text-lg border">🤝 Resume &amp; Interview Prep (Networking, Behavioral, Technical)</div>
+                </div>
+            </div>
+            <div class="flex justify-center mt-6">
+                <div class="item-success p-4 rounded-full shadow-xl text-center font-bold animate-pulse-success border-2">✅ JOB SUCCESS!</div>
+            </div>
+        </div>
+
+        
+
+    </div>
+
+    <script>
+        // JavaScript for scroll-triggered animations (fade-in-up effect)
+        const phaseContainers = document.querySelectorAll('.phase-container');
+        const observerOptions = {
+            root: null, /* relative to the viewport */
+            rootMargin: '0px',
+            threshold: 0.1 /* trigger when 10% of the element is visible */
+        };
+
+        const observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible'); // Add the animation class
+                    observer.unobserve(entry.target); // Stop observing once visible
+                }
+            });
+        }, observerOptions);
+
+        // Observe each phase container
+        phaseContainers.forEach(container => {
+            observer.observe(container);
+        });
+
+        // JavaScript for fetching industry insights from a Large Language Model
+        document.getElementById('fetchInsightsBtn').addEventListener('click', async () => {
+            const insightsText = document.getElementById('insights-text');
+            const loadingSpinner = document.getElementById('loading-spinner');
+            const fetchButton = document.getElementById('fetchInsightsBtn');
+
+            insightsText.textContent = ''; // Clear any previous insights
+            insightsText.classList.add('hidden'); // Hide text area
+            loadingSpinner.classList.remove('hidden'); // Show spinner
+            fetchButton.disabled = true; // Disable button to prevent multiple clicks
+            fetchButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Fetching...'; // Update button text
+
+            try {
+                // Prepare chat history with the user prompt
+                let chatHistory = [];
+                const prompt = "Provide a concise summary (around 200-250 words) of current industry trends and future outlook for Data Science, focusing on key technologies (e.g., Generative AI, MLOps, Responsible AI), emerging roles, and impact on various sectors. Keep it engaging and forward-looking.";
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+
+                // Construct the payload for the API call
+                const payload = { contents: chatHistory };
+                // The apiKey is automatically provided by the Canvas environment, so it's left as an empty string.
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                // Make the API call to Gemini
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                // Check if the API call was successful
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                // Process the API response
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    insightsText.textContent = text; // Set the fetched text
+                    insightsText.classList.remove('hidden'); // Show the text area
+                } else {
+                    insightsText.textContent = 'Failed to fetch insights. Unexpected response structure.';
+                    insightsText.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Error fetching insights:', error);
+                insightsText.textContent = `Error fetching insights: ${error.message}. Please check your network connection or try again later.`;
+                insightsText.classList.remove('hidden');
+            } finally {
+                loadingSpinner.classList.add('hidden'); // Hide spinner
+                fetchButton.disabled = false; // Re-enable button
+                fetchButton.innerHTML = '<i class="fas fa-brain mr-2"></i> Get AI Insights'; // Reset button text
+            }
+        });
+    </script>
+</body>
+</html>
